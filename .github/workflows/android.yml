@@ -24,11 +24,16 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-
     - name: Accept Android SDK Licenses
-      run: yes | sdkmanager --licenses || true
+      run: |
+        mkdir -p "$ANDROID_HOME/licenses" || true
+        echo "24333f8a6351dd797dd779d14a791a4123dd11ad" > "$ANDROID_HOME/licenses/android-sdk-license" || true
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" >> "$ANDROID_HOME/licenses/android-sdk-license" || true
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> "$ANDROID_HOME/licenses/android-sdk-license" || true
+        echo "859f31569af34f261c472913961766a50ab180b4" > "$ANDROID_HOME/licenses/android-sdk-arm-dbt-license" || true
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
     - name: Restore Debug Keystore
       run: |
@@ -53,10 +58,10 @@ jobs:
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
 
-    - name: Run Unit & Robolectric Tests
+    - name: Run Unit Tests
       run: ./gradlew testDebugUnitTest --no-daemon || true
 
-    - name: Build Debug APK with Gradle Wrapper
+    - name: Build Debug APK with Gradle
       run: ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Verify Generated APK
