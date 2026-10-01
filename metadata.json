@@ -1,0 +1,6 @@
+{
+  "name": "My Proxy",
+  "description": "Secure offline proxy client with VpnService tunneling, dynamic country flag resolver, floating timer bubble widget, and split tunneling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
