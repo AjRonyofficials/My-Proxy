@@ -86,7 +86,7 @@ fun ActiveProxyCard(
                     modifier = Modifier.clip(RoundedCornerShape(8.dp))
                 ) {
                     Text(
-                        text = "Change",
+                        text = if (proxy != null) "Change" else "Add",
                         color = CyberCyan,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
@@ -128,33 +128,35 @@ fun ActiveProxyCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = proxy?.name ?: "No Proxy Selected",
+                            text = proxy?.name ?: "No Proxy Configured",
                             color = TextPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(CyberCyan.copy(alpha = 0.15f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = proxy?.type ?: "SOCKS5",
-                                color = CyberCyan,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                        if (proxy != null) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(CyberCyan.copy(alpha = 0.15f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = proxy.type,
+                                    color = CyberCyan,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = if (proxy != null) "${proxy.host}:${proxy.port}" else "Tap to choose from list",
+                        text = if (proxy != null) "${proxy.host}:${proxy.port}" else "Tap to add your real proxy credentials",
                         color = TextSecondary,
                         fontSize = 13.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = if (proxy != null) FontFamily.Monospace else FontFamily.Default
                     )
                 }
 

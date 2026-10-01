@@ -31,6 +31,9 @@ interface ProxyDao {
     @Query("DELETE FROM proxies WHERE id = :id")
     suspend fun deleteById(id: Long)
 
+    @Query("DELETE FROM proxies WHERE host IN (:hosts)")
+    suspend fun deleteByHosts(hosts: List<String>)
+
     @Query("UPDATE proxies SET isDefault = 0")
     suspend fun clearDefault()
 

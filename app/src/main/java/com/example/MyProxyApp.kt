@@ -32,7 +32,7 @@ class MyProxyApp : Application() {
         createNotificationChannel()
 
         CoroutineScope(Dispatchers.IO).launch {
-            repository.preseedIfEmpty()
+            repository.cleanupDummyProxies()
         }
     }
 

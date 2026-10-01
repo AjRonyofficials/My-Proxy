@@ -27,5 +27,18 @@ class ExampleRobolectricTest {
 
     val flagSg = GeoIpFetcher.countryCodeToEmoji("SG")
     assertEquals("🇸🇬", flagSg)
+
+    val flagBd = GeoIpFetcher.countryCodeToEmoji("BD")
+    assertEquals("🇧🇩", flagBd)
+  }
+
+  @Test
+  fun `test extract country code from username`() {
+    assertEquals("US", GeoIpFetcher.extractCountryCodeFromUsername("customer-user-country-us"))
+    assertEquals("GB", GeoIpFetcher.extractCountryCodeFromUsername("proxyuser_country_gb"))
+    assertEquals("BD", GeoIpFetcher.extractCountryCodeFromUsername("myuser-country-bd"))
+    assertEquals("SG", GeoIpFetcher.extractCountryCodeFromUsername("sg-premium-proxy"))
+    assertEquals("DE", GeoIpFetcher.extractCountryCodeFromUsername("zone-resi-de"))
+    assertEquals("CA", GeoIpFetcher.extractCountryCodeFromUsername("CA"))
   }
 }

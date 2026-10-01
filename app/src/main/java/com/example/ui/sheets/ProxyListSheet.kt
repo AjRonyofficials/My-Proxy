@@ -21,20 +21,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.NetworkPing
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -59,8 +58,6 @@ import com.example.ui.theme.CyberCyan
 import com.example.ui.theme.CyberGreen
 import com.example.ui.theme.CyberRed
 import com.example.ui.theme.DarkBackground
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.DarkSurfaceBorder
 import com.example.ui.theme.DarkSurfaceElevated
@@ -101,13 +98,13 @@ fun ProxyListSheet(
             ) {
                 Column {
                     Text(
-                        text = "Proxy Profiles",
+                        text = "Real Proxy Profiles",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Text(
-                        text = "Stored 100% locally in offline Room DB",
+                        text = "Real SOCKS5/HTTP credentials with country short code",
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -147,7 +144,7 @@ fun ProxyListSheet(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Add Custom Proxy Node",
+                    text = "Add Real Proxy Node",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -155,106 +152,148 @@ fun ProxyListSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Proxy List
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(proxies, key = { it.id }) { proxy ->
-                    val isSelected = selectedProxy?.id == proxy.id
-                    val flag = if (proxy.countryCode.isNotBlank()) {
-                        GeoIpFetcher.countryCodeToEmoji(proxy.countryCode)
-                    } else {
-                        "🌐"
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (isSelected) DarkSurfaceElevated else DarkSurface)
-                            .border(
-                                width = if (isSelected) 1.5.dp else 1.dp,
-                                color = if (isSelected) CyberGreen else DarkSurfaceBorder,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .clickable {
-                                onSelectProxy(proxy)
-                            }
-                            .padding(14.dp)
+            // Proxy List or Empty State
+            if (proxies.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(24.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(CyberGreen.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
                         ) {
-                            // Flag Icon
-                            Box(
-                                modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(CircleShape)
-                                    .background(DarkBackground),
-                                contentAlignment = Alignment.Center
+                            Icon(
+                                imageVector = Icons.Default.VpnKey,
+                                contentDescription = null,
+                                tint = CyberGreen,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                        Text(
+                            text = "No Real Proxies Added",
+                            color = TextPrimary,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Tap 'Add Real Proxy Node' above to enter your host, port, and username with country short code (e.g. user-country-us, user-country-bd).",
+                            color = TextSecondary,
+                            fontSize = 13.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(proxies, key = { it.id }) { proxy ->
+                        val isSelected = selectedProxy?.id == proxy.id
+                        val flag = if (proxy.countryCode.isNotBlank()) {
+                            GeoIpFetcher.countryCodeToEmoji(proxy.countryCode)
+                        } else {
+                            "🌐"
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(if (isSelected) DarkSurfaceElevated else DarkSurface)
+                                .border(
+                                    width = if (isSelected) 1.5.dp else 1.dp,
+                                    color = if (isSelected) CyberGreen else DarkSurfaceBorder,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .clickable {
+                                    onSelectProxy(proxy)
+                                }
+                                .padding(14.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = flag, fontSize = 20.sp)
-                            }
+                                // Flag Icon
+                                Box(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .clip(CircleShape)
+                                        .background(DarkBackground),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = flag, fontSize = 20.sp)
+                                }
 
-                            Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
 
-                            // Profile Name & Details
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = proxy.name,
-                                        color = TextPrimary,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(CyberCyan.copy(alpha = 0.15f))
-                                            .padding(horizontal = 5.dp, vertical = 1.dp)
-                                    ) {
+                                // Profile Name & Details
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            text = proxy.type,
-                                            color = CyberCyan,
-                                            fontSize = 9.sp,
+                                            text = proxy.name,
+                                            color = TextPrimary,
+                                            fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(CyberCyan.copy(alpha = 0.15f))
+                                                .padding(horizontal = 5.dp, vertical = 1.dp)
+                                        ) {
+                                            Text(
+                                                text = proxy.type,
+                                                color = CyberCyan,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Text(
+                                        text = "${proxy.host}:${proxy.port}",
+                                        color = TextSecondary,
+                                        fontSize = 12.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    if (proxy.user != null) {
+                                        Text(
+                                            text = "User: ${proxy.user}",
+                                            color = TextMuted,
+                                            fontSize = 10.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            maxLines = 1
                                         )
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(3.dp))
-                                Text(
-                                    text = "${proxy.host}:${proxy.port}",
-                                    color = TextSecondary,
-                                    fontSize = 12.sp,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                                if (proxy.pingMs > 0) {
-                                    Text(
-                                        text = "Ping: ${proxy.pingMs} ms",
-                                        color = CyberGreen,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium
+
+                                // Selection Radio
+                                RadioButton(
+                                    selected = isSelected,
+                                    onClick = { onSelectProxy(proxy) },
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = CyberGreen,
+                                        unselectedColor = TextMuted
                                     )
-                                }
-                            }
-
-                            // Selection Radio
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = { onSelectProxy(proxy) },
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = CyberGreen,
-                                    unselectedColor = TextMuted
                                 )
-                            )
 
-                            // Delete button (allowed for non-defaults or if multiple)
-                            if (proxies.size > 1) {
                                 IconButton(
                                     onClick = { onDeleteProxy(proxy) },
                                     modifier = Modifier.size(32.dp)
@@ -299,6 +338,7 @@ fun AddProxyDialog(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val protocols = listOf("SOCKS5", "HTTP", "HTTPS", "SHADOWSOCKS")
+    val detectedCountry = remember(username) { GeoIpFetcher.extractCountryCodeFromUsername(username) }
 
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -311,13 +351,13 @@ fun AddProxyDialog(
         ) {
             Column {
                 Text(
-                    text = "New Proxy Profile",
+                    text = "Add Real Proxy",
                     color = TextPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Configure custom host & port",
+                    text = "Enter real proxy details & country code",
                     color = TextSecondary,
                     fontSize = 12.sp
                 )
@@ -357,7 +397,8 @@ fun AddProxyDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Profile Name (e.g. NY Fast Node)") },
+                    label = { Text("Profile Name (Optional)") },
+                    placeholder = { Text("e.g. US Residential Node") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = CyberGreen,
@@ -379,8 +420,8 @@ fun AddProxyDialog(
                     OutlinedTextField(
                         value = host,
                         onValueChange = { host = it },
-                        label = { Text("Host / IP") },
-                        placeholder = { Text("154.16.2.1") },
+                        label = { Text("Host / IP *") },
+                        placeholder = { Text("proxy.example.com") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = CyberGreen,
@@ -398,7 +439,7 @@ fun AddProxyDialog(
                     OutlinedTextField(
                         value = portText,
                         onValueChange = { portText = it },
-                        label = { Text("Port") },
+                        label = { Text("Port *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -417,11 +458,11 @@ fun AddProxyDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Optional Auth
+                // Username with live Country detection
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username (Optional)") },
+                    label = { Text("Username (Include country e.g. user-country-us)") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = CyberGreen,
@@ -433,6 +474,31 @@ fun AddProxyDialog(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Live Country Preview if detected in username
+                if (detectedCountry != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    val flag = GeoIpFetcher.countryCodeToEmoji(detectedCountry)
+                    val countryName = GeoIpFetcher.getCountryName(detectedCountry)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CyberGreen.copy(alpha = 0.12f))
+                            .border(1.dp, CyberGreen.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = flag, fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Country Alpha: $detectedCountry • $countryName",
+                            color = CyberGreen,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -484,7 +550,7 @@ fun AddProxyDialog(
                         onClick = {
                             val port = portText.trim().toIntOrNull()
                             if (host.isBlank()) {
-                                errorMessage = "Host cannot be empty"
+                                errorMessage = "Host/IP is required"
                                 return@Button
                             }
                             if (port == null || port !in 1..65535) {
@@ -500,7 +566,7 @@ fun AddProxyDialog(
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.testTag("save_proxy_button")
                     ) {
-                        Text("Save & Use", fontWeight = FontWeight.Bold)
+                        Text("Save & Connect", fontWeight = FontWeight.Bold)
                     }
                 }
             }

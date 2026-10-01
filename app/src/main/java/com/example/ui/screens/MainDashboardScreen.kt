@@ -120,8 +120,10 @@ fun MainDashboardScreen(
                 onToggleClick = {
                     if (isConnected) {
                         onDisconnectRequested()
+                    } else if (selectedProxy != null) {
+                        onConnectRequested(selectedProxy!!)
                     } else {
-                        selectedProxy?.let { onConnectRequested(it) }
+                        showProxySheet = true
                     }
                 }
             )

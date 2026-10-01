@@ -100,18 +100,26 @@ class ProxyViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addProxy(name: String, type: String, host: String, port: Int, user: String?, pass: String?) {
         viewModelScope.launch {
+            val countryCode = GeoIpFetcher.extractCountryCodeFromUsername(user) ?: ""
+            val countryName = if (countryCode.isNotBlank()) GeoIpFetcher.getCountryName(countryCode) else ""
+            val flag = if (countryCode.isNotBlank()) GeoIpFetcher.countryCodeToEmoji(countryCode) else ""
+            val defaultName = if (flag.isNotBlank()) "$flag $countryName $type" else "Real $type Node"
+
             val entity = ProxyEntity(
-                name = name.ifBlank { "Custom ${type.uppercase()}" },
+                name = name.ifBlank { defaultName },
                 type = type.uppercase(),
                 host = host.trim(),
                 port = port,
                 user = user?.takeIf { it.isNotBlank() },
                 pass = pass?.takeIf { it.isNotBlank() },
+                countryCode = countryCode,
+                city = countryName,
                 isDefault = true
             )
             val newId = repository.insert(entity)
             repository.setDefault(newId)
             _selectedProxy.value = entity.copy(id = newId)
+            refreshGeoInfo()
         }
     }
 
@@ -137,8 +145,9 @@ class ProxyViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshGeoInfo() {
         viewModelScope.launch {
             _isResolvingGeo.value = true
-            val targetHost = if (vpnRunning.value) activeProxy.value?.host else null
-            val info = GeoIpFetcher.getDetails(targetHost)
+            val targetHost = if (vpnRunning.value) activeProxy.value?.host else selectedProxy.value?.host
+            val targetUser = if (vpnRunning.value) activeProxy.value?.user else selectedProxy.value?.user
+            val info = GeoIpFetcher.getDetails(targetHost, targetUser)
             _geoInfo.value = info
             _isResolvingGeo.value = false
         }
@@ -170,6 +179,13 @@ class ProxyViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleFloatingBubble(enabled: Boolean) {
         splitConfig.floatingBubbleEnabled = enabled
         _floatingBubbleEnabled.value = enabled
+        val context = getApplication<Application>()
+        val intent = Intent(context, com.example.service.FloatingBubbleService::class.java)
+        if (enabled) {
+            context.startService(intent)
+        } else {
+            context.stopService(intent)
+        }
     }
 
     fun setDnsServer(dns: String) {

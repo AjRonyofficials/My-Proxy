@@ -106,6 +106,7 @@ class MainActivity : ComponentActivity() {
             putExtra("HOST", proxy.host)
             putExtra("PORT", proxy.port)
             putExtra("TYPE", proxy.type)
+            putExtra("USER", proxy.user)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
